@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NewAPI 反馈</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      --bg: #0f172a;
+      --card: #111827;
+      --border: #1f2937;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --danger: #fb7185;
+      --success: #4ade80;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { margin: 0; font-size: 20px; }
+    header .actions { display: flex; gap: 12px; }
+    button {
+      background: var(--accent);
+      border: none;
+      color: #0b1120;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    main {
+      padding: 24px 32px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    label { font-weight: 600; }
+    input, textarea, select {
+      background: #0b1120;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .feedback-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+    .feedback-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+    }
+    .feedback-item.active {
+      border-color: var(--accent);
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      margin-left: 6px;
+      background: #1f2937;
+      color: var(--muted);
+    }
+    .status-open { color: var(--danger); }
+    .status-closed { color: var(--success); }
+    .messages {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .message {
+      background: #0b1120;
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .admin-panel {
+      margin-top: 24px;
+      display: none;
+      gap: 24px;
+    }
+    .admin-panel.active {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+    .row > * { flex: 1; }
+    .notice { color: var(--muted); margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>NewAPI 反馈中心</h1>
+    <div class="actions">
+      <button id="login-btn">Discord 登录</button>
+      <button id="admin-toggle" class="secondary">管理员后台</button>
+    </div>
+  </header>
+  <main>
+    <section class="card">
+      <div class="field">
+        <label for="search">搜索反馈</label>
+        <input id="search" type="text" placeholder="输入关键词或反馈编号" />
+      </div>
+      <div class="field">
+        <label for="feedback-title">页面</label>
+        <input id="feedback-title" type="text" placeholder="例如：控制台页面" />
+      </div>
+      <div class="field">
+        <label for="feedback-content">问题输入框</label>
+        <textarea id="feedback-content" placeholder="描述你的问题或建议"></textarea>
+      </div>
+      <button id="submit-feedback">发送反馈</button>
+      <p class="muted">登录后可查看与管理员的对话，并继续补充信息。</p>
+    </section>
+    <section class="card">
+      <h2>过往对话</h2>
+      <div class="feedback-list" id="feedback-list"></div>
+      <div class="card" style="margin-top: 16px;">
+        <h3>当前反馈对话</h3>
+        <div class="messages" id="message-list"></div>
+        <div class="row" style="margin-top: 12px;">
+          <button id="prev-page" class="secondary">上一页</button>
+          <span id="page-info" class="muted" style="align-self:center;">第 1 页</span>
+          <button id="next-page" class="secondary">下一页</button>
+        </div>
+        <div class="field">
+          <label for="new-message">继续回复</label>
+          <textarea id="new-message" placeholder="补充说明"></textarea>
+        </div>
+        <button id="send-message">发送</button>
+      </div>
+    </section>
+  </main>
+
+  <section class="card" style="margin: 24px 32px;">
+    <h2>他人反馈（只读）</h2>
+    <p class="muted">仅展示公开状态的反馈内容，非管理员与反馈者无法参与对话。</p>
+    <div class="feedback-list" id="public-feedback-list"></div>
+  </section>
+
+  <section class="card admin-panel" id="admin-panel">
+    <div>
+      <h2>管理员登录</h2>
+      <div class="field">
+        <label for="admin-user">用户名</label>
+        <input id="admin-user" type="text" />
+      </div>
+      <div class="field">
+        <label for="admin-pass">密码</label>
+        <input id="admin-pass" type="password" />
+      </div>
+      <button id="admin-login">进入后台</button>
+      <p class="notice" id="admin-login-status"></p>
+
+      <div id="admin-config" style="display:none; margin-top:20px;">
+        <h3>Discord 服务器/身份组配置</h3>
+        <div class="field">
+          <label for="guild-config">JSON 列表</label>
+          <textarea id="guild-config" placeholder='[{"guildId":"123","roleId":"456","label":"核心用户"}]'></textarea>
+        </div>
+        <button id="save-config">保存配置</button>
+        <p class="notice" id="config-status"></p>
+      </div>
+    </div>
+    <div>
+      <h2>反馈管理</h2>
+      <div class="row" style="margin-bottom: 12px;">
+        <input id="admin-search" type="text" placeholder="搜索标题/用户/编号" />
+        <select id="admin-status-filter">
+          <option value="all">全部</option>
+          <option value="open">未处理</option>
+          <option value="closed">已处理</option>
+        </select>
+      </div>
+      <div class="feedback-list" id="admin-feedback-list"></div>
+      <div class="card" style="margin-top: 16px;">
+        <h3>管理员对话</h3>
+        <div class="messages" id="admin-message-list"></div>
+        <div class="row" style="margin-top: 12px;">
+          <button id="admin-prev-page" class="secondary">上一页</button>
+          <span id="admin-page-info" class="muted" style="align-self:center;">第 1 页</span>
+          <button id="admin-next-page" class="secondary">下一页</button>
+        </div>
+        <div class="field">
+          <label for="admin-message">回复内容</label>
+          <textarea id="admin-message" placeholder="管理员回复"></textarea>
+        </div>
+        <div class="row">
+          <select id="status-select">
+            <option value="open">未处理</option>
+            <option value="closed">已处理</option>
+          </select>
+          <button id="admin-send">发送并更新状态</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const api = (path, options = {}) => fetch(path, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      ...options,
+    }).then(async (res) => {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw data;
+      return data;
+    });
+
+    const loginBtn = document.getElementById('login-btn');
+    const submitBtn = document.getElementById('submit-feedback');
+    const sendBtn = document.getElementById('send-message');
+    const adminToggle = document.getElementById('admin-toggle');
+    const adminPanel = document.getElementById('admin-panel');
+
+    const feedbackList = document.getElementById('feedback-list');
+    const messageList = document.getElementById('message-list');
+    const publicList = document.getElementById('public-feedback-list');
+
+    const adminLoginBtn = document.getElementById('admin-login');
+    const adminStatus = document.getElementById('admin-login-status');
+    const adminConfig = document.getElementById('admin-config');
+    const guildConfig = document.getElementById('guild-config');
+    const configStatus = document.getElementById('config-status');
+
+    const adminFeedbackList = document.getElementById('admin-feedback-list');
+    const adminMessageList = document.getElementById('admin-message-list');
+    const adminSendBtn = document.getElementById('admin-send');
+    const statusSelect = document.getElementById('status-select');
+    const adminSearch = document.getElementById('admin-search');
+    const adminStatusFilter = document.getElementById('admin-status-filter');
+
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const pageInfo = document.getElementById('page-info');
+    const adminPrevPageBtn = document.getElementById('admin-prev-page');
+    const adminNextPageBtn = document.getElementById('admin-next-page');
+    const adminPageInfo = document.getElementById('admin-page-info');
+
+    let currentFeedbackId = null;
+    let currentPage = 1;
+    let totalPages = 1;
+    let adminCurrentId = null;
+    let adminPage = 1;
+    let adminTotalPages = 1;
+
+    loginBtn.addEventListener('click', () => {
+      window.location.href = '/api/auth/discord';
+    });
+
+    adminToggle.addEventListener('click', () => {
+      adminPanel.classList.toggle('active');
+    });
+
+    submitBtn.addEventListener('click', async () => {
+      const title = document.getElementById('feedback-title').value.trim();
+      const content = document.getElementById('feedback-content').value.trim();
+      if (!title || !content) return alert('请填写页面和问题内容');
+      try {
+        await api('/api/feedbacks', {
+          method: 'POST',
+          body: JSON.stringify({ title, content }),
+        });
+        document.getElementById('feedback-content').value = '';
+        loadFeedbacks();
+      } catch (err) {
+        alert(err.message || '提交失败');
+      }
+    });
+
+    sendBtn.addEventListener('click', async () => {
+      if (!currentFeedbackId) return alert('请选择反馈');
+      const content = document.getElementById('new-message').value.trim();
+      if (!content) return;
+      try {
+        await api(`/api/feedbacks/${currentFeedbackId}/messages`, {
+          method: 'POST',
+          body: JSON.stringify({ content }),
+        });
+        document.getElementById('new-message').value = '';
+        loadMessages(currentFeedbackId);
+      } catch (err) {
+        alert(err.message || '发送失败');
+      }
+    });
+
+    adminLoginBtn.addEventListener('click', async () => {
+      const user = document.getElementById('admin-user').value.trim();
+      const password = document.getElementById('admin-pass').value.trim();
+      adminStatus.textContent = '登录中...';
+      try {
+        await api('/api/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ user, password }),
+        });
+        adminStatus.textContent = '登录成功';
+        adminConfig.style.display = 'block';
+        loadAdminConfig();
+        loadAdminFeedbacks();
+      } catch (err) {
+        adminStatus.textContent = err.message || '登录失败';
+      }
+    });
+
+    adminSearch.addEventListener('input', () => {
+      loadAdminFeedbacks();
+    });
+
+    adminStatusFilter.addEventListener('change', () => {
+      loadAdminFeedbacks();
+    });
+
+    document.getElementById('save-config').addEventListener('click', async () => {
+      try {
+        const config = JSON.parse(guildConfig.value || '[]');
+        await api('/api/admin/config', {
+          method: 'PUT',
+          body: JSON.stringify({ config }),
+        });
+        configStatus.textContent = '保存成功';
+      } catch (err) {
+        configStatus.textContent = err.message || '保存失败';
+      }
+    });
+
+    adminSendBtn.addEventListener('click', async () => {
+      if (!adminCurrentId) return alert('请选择反馈');
+      const content = document.getElementById('admin-message').value.trim();
+      const status = statusSelect.value;
+      if (!content) return alert('请输入回复内容');
+      try {
+        await api(`/api/admin/feedbacks/${adminCurrentId}/messages`, {
+          method: 'POST',
+          body: JSON.stringify({ content, status }),
+        });
+        document.getElementById('admin-message').value = '';
+        loadAdminMessages(adminCurrentId);
+        loadAdminFeedbacks();
+      } catch (err) {
+        alert(err.message || '发送失败');
+      }
+    });
+
+    prevPageBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage -= 1;
+        loadMessages(currentFeedbackId);
+      }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage += 1;
+        loadMessages(currentFeedbackId);
+      }
+    });
+
+    adminPrevPageBtn.addEventListener('click', () => {
+      if (adminPage > 1) {
+        adminPage -= 1;
+        loadAdminMessages(adminCurrentId);
+      }
+    });
+
+    adminNextPageBtn.addEventListener('click', () => {
+      if (adminPage < adminTotalPages) {
+        adminPage += 1;
+        loadAdminMessages(adminCurrentId);
+      }
+    });
+
+
+    async function loadFeedbacks() {
+      try {
+        const data = await api('/api/feedbacks');
+        feedbackList.innerHTML = '';
+        data.items.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'feedback-item' + (item.id === currentFeedbackId ? ' active' : '');
+          div.innerHTML = `<strong>${item.title}</strong> <span class="tag ${item.status === 'open' ? 'status-open' : 'status-closed'}">${item.status === 'open' ? '未处理' : '已处理'}</span>`;
+          div.addEventListener('click', () => {
+            currentFeedbackId = item.id;
+            currentPage = 1;
+            loadMessages(item.id);
+            loadFeedbacks();
+          });
+          feedbackList.appendChild(div);
+        });
+      } catch (err) {
+        feedbackList.innerHTML = '<p class="muted">请先登录 Discord。</p>';
+      }
+    }
+
+    async function loadMessages(id) {
+      if (!id) return;
+      const data = await api(`/api/feedbacks/${id}?page=${currentPage}&pageSize=6`);
+      messageList.innerHTML = '';
+      data.messages.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'message';
+        div.innerHTML = `<strong>${msg.author}</strong><div>${msg.content}</div><div class="muted">${new Date(msg.createdAt).toLocaleString()}</div>`;
+        messageList.appendChild(div);
+      });
+      currentPage = data.page;
+      totalPages = data.totalPages;
+      pageInfo.textContent = `第 ${currentPage} / ${totalPages} 页`;
+      prevPageBtn.disabled = currentPage <= 1;
+      nextPageBtn.disabled = currentPage >= totalPages;
+    }
+
+    async function loadPublicFeedbacks() {
+      const data = await api('/api/feedbacks/public');
+      publicList.innerHTML = '';
+      data.items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'feedback-item';
+        div.innerHTML = `<strong>${item.title}</strong><div class="muted">${item.preview}</div>`;
+        publicList.appendChild(div);
+      });
+    }
+
+    async function loadAdminConfig() {
+      const data = await api('/api/admin/config');
+      guildConfig.value = JSON.stringify(data.config || [], null, 2);
+    }
+
+    async function loadAdminFeedbacks() {
+      const search = encodeURIComponent(adminSearch.value.trim());
+      const status = encodeURIComponent(adminStatusFilter.value);
+      const data = await api(`/api/admin/feedbacks?search=${search}&status=${status}`);
+      adminFeedbackList.innerHTML = '';
+      data.items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'feedback-item' + (item.id === adminCurrentId ? ' active' : '');
+        div.innerHTML = `<strong>${item.title}</strong><div class="muted">${item.username}</div><span class="tag ${item.status === 'open' ? 'status-open' : 'status-closed'}">${item.status === 'open' ? '未处理' : '已处理'}</span>`;
+        div.addEventListener('click', () => {
+          adminCurrentId = item.id;
+          adminPage = 1;
+          loadAdminMessages(item.id);
+          loadAdminFeedbacks();
+        });
+        adminFeedbackList.appendChild(div);
+      });
+    }
+
+    async function loadAdminMessages(id) {
+      if (!id) return;
+      const data = await api(`/api/admin/feedbacks/${id}?page=${adminPage}&pageSize=6`);
+      adminMessageList.innerHTML = '';
+      statusSelect.value = data.status;
+      data.messages.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'message';
+        div.innerHTML = `<strong>${msg.author}</strong><div>${msg.content}</div><div class="muted">${new Date(msg.createdAt).toLocaleString()}</div>`;
+        adminMessageList.appendChild(div);
+      });
+      adminPage = data.page;
+      adminTotalPages = data.totalPages;
+      adminPageInfo.textContent = `第 ${adminPage} / ${adminTotalPages} 页`;
+      adminPrevPageBtn.disabled = adminPage <= 1;
+      adminNextPageBtn.disabled = adminPage >= adminTotalPages;
+    }
+
+    loadFeedbacks();
+    loadPublicFeedbacks();
+  </script>
+</body>
+</html>

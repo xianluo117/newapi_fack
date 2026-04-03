@@ -1,0 +1,6 @@
+name = "newapi-feedback"
+main = "functions/[[path]].ts"
+compatibility_date = "2024-10-01"
+
+[site]
+bucket = "public"
