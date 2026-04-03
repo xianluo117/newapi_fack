@@ -1,6 +1,6 @@
-import { json, isAdmin, listFeedbacks } from '../../../utils';
+import { isAdmin, json, listFeedbacks, type PagesFunctionContext } from '../../../utils';
 
-export async function onRequestGet(context) {
+export async function onRequestGet(context: PagesFunctionContext): Promise<Response> {
   const { env, request } = context;
   if (!isAdmin(request, env)) return json({ message: '未授权' }, 401);
   const url = new URL(request.url);
@@ -18,7 +18,7 @@ export async function onRequestGet(context) {
   });
 
   return json({
-    items: filtered.map(item => ({
+    items: filtered.map((item) => ({
       id: item.id,
       title: item.title,
       status: item.status,

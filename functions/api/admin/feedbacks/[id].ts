@@ -1,6 +1,6 @@
-import { json, isAdmin, getFeedback } from '../../../../utils';
+import { getFeedback, isAdmin, json, type PagesFunctionContext } from '../../../utils';
 
-export async function onRequestGet(context) {
+export async function onRequestGet(context: PagesFunctionContext): Promise<Response> {
   const { env, request, params } = context;
   if (!isAdmin(request, env)) return json({ message: '未授权' }, 401);
   const feedback = await getFeedback(env, params.id);
@@ -11,10 +11,7 @@ export async function onRequestGet(context) {
   const total = feedback.messages.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const pageParam = url.searchParams.get('page');
-  const page = Math.min(
-    Math.max(1, Number(pageParam || totalPages)),
-    totalPages
-  );
+  const page = Math.min(Math.max(1, Number(pageParam || totalPages)), totalPages);
   const start = (page - 1) * pageSize;
   const messages = feedback.messages.slice(start, start + pageSize);
 

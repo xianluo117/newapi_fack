@@ -1,6 +1,6 @@
-import { json, requireUser, getFeedback } from '../../utils';
+import { getErrorMessage, getFeedback, json, requireUser, type PagesFunctionContext } from '../../utils';
 
-export async function onRequestGet(context) {
+export async function onRequestGet(context: PagesFunctionContext): Promise<Response> {
   const { env, request, params } = context;
   try {
     const user = await requireUser(request, env);
@@ -14,15 +14,12 @@ export async function onRequestGet(context) {
     const total = feedback.messages.length;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
     const pageParam = url.searchParams.get('page');
-    const page = Math.min(
-      Math.max(1, Number(pageParam || totalPages)),
-      totalPages
-    );
+    const page = Math.min(Math.max(1, Number(pageParam || totalPages)), totalPages);
     const start = (page - 1) * pageSize;
     const messages = feedback.messages.slice(start, start + pageSize);
 
     return json({ messages, page, pageSize, total, totalPages });
-  } catch (err) {
-    return json({ message: err.message || '未登录' }, 401);
+  } catch (err: unknown) {
+    return json({ message: getErrorMessage(err, '未登录') }, 401);
   }
 }

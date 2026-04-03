@@ -1,7 +1,21 @@
-import { getCookie } from './utils';
+import { getCookie, type PagesFunctionContext } from './utils';
 
-export async function onRequest(context) {
-  const { request, env, next } = context;
+export async function onRequest(context: PagesFunctionContext): Promise<Response> {
+  const { request, next } = context;
+
+  if (request.method === 'OPTIONS') {
+    const origin = request.headers.get('Origin') || '*';
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+      },
+    });
+  }
+
   const response = await next();
   const origin = request.headers.get('Origin');
 
@@ -10,10 +24,6 @@ export async function onRequest(context) {
     response.headers.set('Access-Control-Allow-Credentials', 'true');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
     response.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  }
-
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: response.headers });
   }
 
   const session = getCookie(request, 'session');

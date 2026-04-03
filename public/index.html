@@ -3,242 +3,519 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NewAPI 反馈</title>
+  <title>NewAPI 反馈中心</title>
   <style>
     :root {
-      color-scheme: light dark;
-      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-      --bg: #0f172a;
-      --card: #111827;
-      --border: #1f2937;
-      --text: #e2e8f0;
+      color-scheme: dark;
+      --bg: #07111f;
+      --bg-soft: #0b1729;
+      --card: rgba(15, 23, 42, 0.88);
+      --card-strong: rgba(17, 24, 39, 0.96);
+      --border: rgba(148, 163, 184, 0.16);
+      --text: #e5eefb;
       --muted: #94a3b8;
       --accent: #38bdf8;
-      --danger: #fb7185;
+      --accent-strong: #0ea5e9;
       --success: #4ade80;
+      --danger: #fb7185;
+      --shadow: 0 20px 60px rgba(2, 8, 23, 0.45);
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      background: var(--bg);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.1), transparent 30%),
+        linear-gradient(180deg, #07111f 0%, #0a1220 100%);
       color: var(--text);
     }
-    header {
-      padding: 24px 32px;
-      border-bottom: 1px solid var(--border);
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      width: min(1280px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+
+    .topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 16px;
+      padding: 18px 22px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: rgba(8, 15, 30, 0.78);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 16px;
+      z-index: 10;
     }
-    header h1 { margin: 0; font-size: 20px; }
-    header .actions { display: flex; gap: 12px; }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .brand p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .user-badge {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .user-badge.active {
+      display: inline-flex;
+    }
+
     button {
-      background: var(--accent);
+      appearance: none;
       border: none;
-      color: #0b1120;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    button.secondary {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-    main {
-      padding: 24px 32px;
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 24px;
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 20px;
+      padding: 11px 16px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+      color: #03111d;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
+      box-shadow: 0 8px 24px rgba(14, 165, 233, 0.24);
     }
+
+    button:hover:not(:disabled) { transform: translateY(-1px); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+    button.secondary {
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .hero {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .hero-panel,
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-panel {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 240px;
+    }
+
+    .hero-panel h2 {
+      margin: 0 0 14px;
+      font-size: 34px;
+      line-height: 1.2;
+    }
+
+    .hero-panel p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .hero-stats {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .login-panel {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .login-panel h3,
+    .section-header h2,
+    .composer h3,
+    .aside-card h3 {
+      margin: 0;
+    }
+
+    .login-panel p,
+    .subtle,
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .page-grid {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 22px;
+    }
+
+    .card { padding: 22px; }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
     .field {
       display: flex;
       flex-direction: column;
       gap: 8px;
       margin-bottom: 16px;
     }
-    label { font-weight: 600; }
-    input, textarea, select {
-      background: #0b1120;
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #d8e6fb;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(2, 8, 23, 0.72);
       color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px 14px;
       font-size: 14px;
+      outline: none;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease;
     }
-    textarea { min-height: 120px; resize: vertical; }
-    .muted { color: var(--muted); font-size: 12px; }
-    .feedback-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 420px;
-      overflow-y: auto;
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: rgba(56, 189, 248, 0.6);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
     }
-    .feedback-item {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      cursor: pointer;
+
+    textarea {
+      min-height: 132px;
+      resize: vertical;
     }
-    .feedback-item.active {
-      border-color: var(--accent);
-    }
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      margin-left: 6px;
-      background: #1f2937;
-      color: var(--muted);
-    }
-    .status-open { color: var(--danger); }
-    .status-closed { color: var(--success); }
-    .messages {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: 320px;
-      overflow-y: auto;
-    }
-    .message {
-      background: #0b1120;
-      border: 1px solid var(--border);
-      padding: 10px;
-      border-radius: 10px;
-    }
-    .admin-panel {
-      margin-top: 24px;
-      display: none;
-      gap: 24px;
-    }
-    .admin-panel.active {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
+
     .row {
       display: flex;
       gap: 12px;
+      flex-wrap: wrap;
     }
-    .row > * { flex: 1; }
-    .notice { color: var(--muted); margin-top: 8px; }
+
+    .row > * {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .feedback-list,
+    .messages {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 460px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .feedback-item,
+    .message {
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(2, 8, 23, 0.58);
+    }
+
+    .feedback-item {
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.16s ease, transform 0.16s ease, background 0.16s ease;
+    }
+
+    .feedback-item:hover {
+      transform: translateY(-1px);
+      border-color: rgba(56, 189, 248, 0.42);
+      background: rgba(6, 16, 32, 0.78);
+    }
+
+    .feedback-item.active {
+      border-color: rgba(56, 189, 248, 0.8);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.2);
+    }
+
+    .feedback-title-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .feedback-meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .status-open { color: var(--danger); }
+    .status-closed { color: var(--success); }
+
+    .message {
+      padding: 14px;
+    }
+
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .message-header strong { font-size: 14px; }
+    .message-body { line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+
+    .pager {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 14px 0 4px;
+    }
+
+    .composer {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .aside-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .aside-card {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--card-strong);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .empty {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px dashed rgba(148, 163, 184, 0.22);
+      color: var(--muted);
+      text-align: center;
+      background: rgba(2, 8, 23, 0.35);
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .page-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .container {
+        width: min(100% - 20px, 100%);
+        padding-top: 14px;
+      }
+
+      .topbar {
+        padding: 16px;
+        border-radius: 18px;
+        position: static;
+      }
+
+      .hero-panel h2 {
+        font-size: 28px;
+      }
+
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .card,
+      .hero-panel,
+      .login-panel,
+      .aside-card {
+        padding: 18px;
+      }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>NewAPI 反馈中心</h1>
-    <div class="actions">
-      <button id="login-btn">Discord 登录</button>
-      <button id="admin-toggle" class="secondary">管理员后台</button>
-    </div>
-  </header>
-  <main>
-    <section class="card">
-      <div class="field">
-        <label for="search">搜索反馈</label>
-        <input id="search" type="text" placeholder="输入关键词或反馈编号" />
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <h1>NewAPI 反馈中心</h1>
+        <p>Discord 强制登录 · 支持多轮反馈对话 · Cloudflare Pages 部署</p>
       </div>
-      <div class="field">
-        <label for="feedback-title">页面</label>
-        <input id="feedback-title" type="text" placeholder="例如：控制台页面" />
+      <div class="topbar-actions">
+        <div id="user-badge" class="user-badge"></div>
       </div>
-      <div class="field">
-        <label for="feedback-content">问题输入框</label>
-        <textarea id="feedback-content" placeholder="描述你的问题或建议"></textarea>
-      </div>
-      <button id="submit-feedback">发送反馈</button>
-      <p class="muted">登录后可查看与管理员的对话，并继续补充信息。</p>
-    </section>
-    <section class="card">
-      <h2>过往对话</h2>
-      <div class="feedback-list" id="feedback-list"></div>
-      <div class="card" style="margin-top: 16px;">
-        <h3>当前反馈对话</h3>
-        <div class="messages" id="message-list"></div>
-        <div class="row" style="margin-top: 12px;">
-          <button id="prev-page" class="secondary">上一页</button>
-          <span id="page-info" class="muted" style="align-self:center;">第 1 页</span>
-          <button id="next-page" class="secondary">下一页</button>
+    </header>
+
+    <section class="hero">
+      <div class="hero-panel">
+        <h2>提交 NewAPI 使用反馈，和管理员持续沟通</h2>
+        <p>
+          本站要求使用 Discord 登录后才能访问与提交反馈，系统会校验你是否在指定服务器拥有指定身份组。
+          登录后你可以查看自己的历史反馈、继续回复，并浏览公开的他人反馈摘要。
+        </p>
+        <div class="hero-stats">
+          <div class="stat"><strong>Discord</strong><span>强制登录访问</span></div>
+          <div class="stat"><strong>多轮对话</strong><span>单反馈持续沟通</span></div>
+          <div class="stat"><strong>公开反馈</strong><span>仅只读展示他人内容</span></div>
         </div>
-        <div class="field">
-          <label for="new-message">继续回复</label>
-          <textarea id="new-message" placeholder="补充说明"></textarea>
-        </div>
-        <button id="send-message">发送</button>
+      </div>
+      <div class="hero-panel login-panel">
+        <h3>开始使用</h3>
+        <p>若未登录，页面会自动跳转至 Discord OAuth2 授权。授权通过后返回本页面继续使用。</p>
+        <button id="login-btn" type="button">使用 Discord 登录</button>
+        <p class="subtle">需要权限范围：identify / guilds.channels.read</p>
       </div>
     </section>
-  </main>
 
-  <section class="card" style="margin: 24px 32px;">
-    <h2>他人反馈（只读）</h2>
-    <p class="muted">仅展示公开状态的反馈内容，非管理员与反馈者无法参与对话。</p>
-    <div class="feedback-list" id="public-feedback-list"></div>
-  </section>
-
-  <section class="card admin-panel" id="admin-panel">
-    <div>
-      <h2>管理员登录</h2>
-      <div class="field">
-        <label for="admin-user">用户名</label>
-        <input id="admin-user" type="text" />
-      </div>
-      <div class="field">
-        <label for="admin-pass">密码</label>
-        <input id="admin-pass" type="password" />
-      </div>
-      <button id="admin-login">进入后台</button>
-      <p class="notice" id="admin-login-status"></p>
-
-      <div id="admin-config" style="display:none; margin-top:20px;">
-        <h3>Discord 服务器/身份组配置</h3>
-        <div class="field">
-          <label for="guild-config">JSON 列表</label>
-          <textarea id="guild-config" placeholder='[{"guildId":"123","roleId":"456","label":"核心用户"}]'></textarea>
+    <section class="page-grid">
+      <div class="card">
+        <div class="section-header">
+          <h2>提交反馈</h2>
+          <span class="muted">仅已登录用户可提交</span>
         </div>
-        <button id="save-config">保存配置</button>
-        <p class="notice" id="config-status"></p>
-      </div>
-    </div>
-    <div>
-      <h2>反馈管理</h2>
-      <div class="row" style="margin-bottom: 12px;">
-        <input id="admin-search" type="text" placeholder="搜索标题/用户/编号" />
-        <select id="admin-status-filter">
-          <option value="all">全部</option>
-          <option value="open">未处理</option>
-          <option value="closed">已处理</option>
-        </select>
-      </div>
-      <div class="feedback-list" id="admin-feedback-list"></div>
-      <div class="card" style="margin-top: 16px;">
-        <h3>管理员对话</h3>
-        <div class="messages" id="admin-message-list"></div>
-        <div class="row" style="margin-top: 12px;">
-          <button id="admin-prev-page" class="secondary">上一页</button>
-          <span id="admin-page-info" class="muted" style="align-self:center;">第 1 页</span>
-          <button id="admin-next-page" class="secondary">下一页</button>
+
+        <div class="field">
+          <label for="search">搜索我的反馈</label>
+          <input id="search" type="text" placeholder="输入关键词筛选自己的反馈" />
         </div>
         <div class="field">
-          <label for="admin-message">回复内容</label>
-          <textarea id="admin-message" placeholder="管理员回复"></textarea>
+          <label for="feedback-title">页面</label>
+          <input id="feedback-title" type="text" placeholder="例如：控制台页面 / 充值页面 / API 文档" />
         </div>
-        <div class="row">
-          <select id="status-select">
-            <option value="open">未处理</option>
-            <option value="closed">已处理</option>
-          </select>
-          <button id="admin-send">发送并更新状态</button>
+        <div class="field">
+          <label for="feedback-content">问题输入框</label>
+          <textarea id="feedback-content" placeholder="请清晰描述问题现象、复现步骤、期望结果"></textarea>
+        </div>
+        <button id="submit-feedback" type="button">发送反馈</button>
+        <p class="muted">反馈提交后会进入你的个人对话列表，管理员可在同一反馈下继续回复。</p>
+      </div>
+
+      <div class="aside-stack">
+        <div class="aside-card">
+          <div class="section-header">
+            <h2>我的过往对话</h2>
+            <span class="muted">按最近更新时间排序</span>
+          </div>
+          <div class="feedback-list" id="feedback-list"></div>
+        </div>
+
+        <div class="aside-card">
+          <div class="section-header">
+            <h2>公开反馈只读区</h2>
+            <span class="muted">不显示他人用户名</span>
+          </div>
+          <div class="feedback-list" id="public-feedback-list"></div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+    <section class="card" style="margin-top: 22px;">
+      <div class="section-header">
+        <h2>当前反馈对话</h2>
+        <span id="page-info" class="muted">第 1 / 1 页</span>
+      </div>
+      <div class="messages" id="message-list"></div>
+      <div class="pager">
+        <button id="prev-page" class="secondary" type="button">上一页</button>
+        <button id="next-page" class="secondary" type="button">下一页</button>
+      </div>
+      <div class="composer">
+        <h3>继续补充</h3>
+        <div class="field" style="margin-top: 12px;">
+          <label for="new-message">回复内容</label>
+          <textarea id="new-message" placeholder="继续补充你的问题、截图说明或测试结果"></textarea>
+        </div>
+        <button id="send-message" type="button">发送回复</button>
+      </div>
+    </section>
+  </div>
 
   <script>
     const api = (path, options = {}) => fetch(path, {
@@ -252,48 +529,26 @@
     });
 
     const loginBtn = document.getElementById('login-btn');
+    const userBadge = document.getElementById('user-badge');
     const submitBtn = document.getElementById('submit-feedback');
     const sendBtn = document.getElementById('send-message');
-    const adminToggle = document.getElementById('admin-toggle');
-    const adminPanel = document.getElementById('admin-panel');
+    const searchInput = document.getElementById('search');
 
     const feedbackList = document.getElementById('feedback-list');
-    const messageList = document.getElementById('message-list');
     const publicList = document.getElementById('public-feedback-list');
-
-    const adminLoginBtn = document.getElementById('admin-login');
-    const adminStatus = document.getElementById('admin-login-status');
-    const adminConfig = document.getElementById('admin-config');
-    const guildConfig = document.getElementById('guild-config');
-    const configStatus = document.getElementById('config-status');
-
-    const adminFeedbackList = document.getElementById('admin-feedback-list');
-    const adminMessageList = document.getElementById('admin-message-list');
-    const adminSendBtn = document.getElementById('admin-send');
-    const statusSelect = document.getElementById('status-select');
-    const adminSearch = document.getElementById('admin-search');
-    const adminStatusFilter = document.getElementById('admin-status-filter');
-
+    const messageList = document.getElementById('message-list');
+    const pageInfo = document.getElementById('page-info');
     const prevPageBtn = document.getElementById('prev-page');
     const nextPageBtn = document.getElementById('next-page');
-    const pageInfo = document.getElementById('page-info');
-    const adminPrevPageBtn = document.getElementById('admin-prev-page');
-    const adminNextPageBtn = document.getElementById('admin-next-page');
-    const adminPageInfo = document.getElementById('admin-page-info');
 
+    let me = null;
+    let myFeedbacks = [];
     let currentFeedbackId = null;
     let currentPage = 1;
     let totalPages = 1;
-    let adminCurrentId = null;
-    let adminPage = 1;
-    let adminTotalPages = 1;
 
     loginBtn.addEventListener('click', () => {
       window.location.href = '/api/auth/discord';
-    });
-
-    adminToggle.addEventListener('click', () => {
-      adminPanel.classList.toggle('active');
     });
 
     submitBtn.addEventListener('click', async () => {
@@ -306,7 +561,7 @@
           body: JSON.stringify({ title, content }),
         });
         document.getElementById('feedback-content').value = '';
-        loadFeedbacks();
+        await loadFeedbacks();
       } catch (err) {
         alert(err.message || '提交失败');
       }
@@ -315,75 +570,22 @@
     sendBtn.addEventListener('click', async () => {
       if (!currentFeedbackId) return alert('请选择反馈');
       const content = document.getElementById('new-message').value.trim();
-      if (!content) return;
+      if (!content) return alert('请输入回复内容');
       try {
         await api(`/api/feedbacks/${currentFeedbackId}/messages`, {
           method: 'POST',
           body: JSON.stringify({ content }),
         });
         document.getElementById('new-message').value = '';
-        loadMessages(currentFeedbackId);
+        currentPage = totalPages;
+        await loadMessages(currentFeedbackId);
+        await loadFeedbacks();
       } catch (err) {
         alert(err.message || '发送失败');
       }
     });
 
-    adminLoginBtn.addEventListener('click', async () => {
-      const user = document.getElementById('admin-user').value.trim();
-      const password = document.getElementById('admin-pass').value.trim();
-      adminStatus.textContent = '登录中...';
-      try {
-        await api('/api/admin/login', {
-          method: 'POST',
-          body: JSON.stringify({ user, password }),
-        });
-        adminStatus.textContent = '登录成功';
-        adminConfig.style.display = 'block';
-        loadAdminConfig();
-        loadAdminFeedbacks();
-      } catch (err) {
-        adminStatus.textContent = err.message || '登录失败';
-      }
-    });
-
-    adminSearch.addEventListener('input', () => {
-      loadAdminFeedbacks();
-    });
-
-    adminStatusFilter.addEventListener('change', () => {
-      loadAdminFeedbacks();
-    });
-
-    document.getElementById('save-config').addEventListener('click', async () => {
-      try {
-        const config = JSON.parse(guildConfig.value || '[]');
-        await api('/api/admin/config', {
-          method: 'PUT',
-          body: JSON.stringify({ config }),
-        });
-        configStatus.textContent = '保存成功';
-      } catch (err) {
-        configStatus.textContent = err.message || '保存失败';
-      }
-    });
-
-    adminSendBtn.addEventListener('click', async () => {
-      if (!adminCurrentId) return alert('请选择反馈');
-      const content = document.getElementById('admin-message').value.trim();
-      const status = statusSelect.value;
-      if (!content) return alert('请输入回复内容');
-      try {
-        await api(`/api/admin/feedbacks/${adminCurrentId}/messages`, {
-          method: 'POST',
-          body: JSON.stringify({ content, status }),
-        });
-        document.getElementById('admin-message').value = '';
-        loadAdminMessages(adminCurrentId);
-        loadAdminFeedbacks();
-      } catch (err) {
-        alert(err.message || '发送失败');
-      }
-    });
+    searchInput.addEventListener('input', renderMyFeedbacks);
 
     prevPageBtn.addEventListener('click', () => {
       if (currentPage > 1) {
@@ -399,52 +601,94 @@
       }
     });
 
-    adminPrevPageBtn.addEventListener('click', () => {
-      if (adminPage > 1) {
-        adminPage -= 1;
-        loadAdminMessages(adminCurrentId);
+    async function ensureLogin() {
+      try {
+        const data = await api('/api/me');
+        me = data.user;
+        userBadge.classList.add('active');
+        userBadge.textContent = `已登录：${me.username}`;
+        return true;
+      } catch (err) {
+        window.location.href = '/api/auth/discord';
+        return false;
       }
-    });
-
-    adminNextPageBtn.addEventListener('click', () => {
-      if (adminPage < adminTotalPages) {
-        adminPage += 1;
-        loadAdminMessages(adminCurrentId);
-      }
-    });
-
+    }
 
     async function loadFeedbacks() {
       try {
         const data = await api('/api/feedbacks');
-        feedbackList.innerHTML = '';
-        data.items.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'feedback-item' + (item.id === currentFeedbackId ? ' active' : '');
-          div.innerHTML = `<strong>${item.title}</strong> <span class="tag ${item.status === 'open' ? 'status-open' : 'status-closed'}">${item.status === 'open' ? '未处理' : '已处理'}</span>`;
-          div.addEventListener('click', () => {
-            currentFeedbackId = item.id;
-            currentPage = 1;
-            loadMessages(item.id);
-            loadFeedbacks();
-          });
-          feedbackList.appendChild(div);
-        });
+        myFeedbacks = data.items || [];
+        if (!currentFeedbackId && myFeedbacks.length > 0) {
+          currentFeedbackId = myFeedbacks[0].id;
+        }
+        renderMyFeedbacks();
+        if (currentFeedbackId) {
+          const exists = myFeedbacks.some((item) => item.id === currentFeedbackId);
+          if (!exists && myFeedbacks.length > 0) currentFeedbackId = myFeedbacks[0].id;
+          if (exists || myFeedbacks.length > 0) await loadMessages(currentFeedbackId);
+        } else {
+          messageList.innerHTML = '<div class="empty">暂无反馈，先提交第一条吧。</div>';
+        }
       } catch (err) {
-        feedbackList.innerHTML = '<p class="muted">请先登录 Discord。</p>';
+        feedbackList.innerHTML = '<div class="empty">登录后可查看自己的反馈记录。</div>';
       }
+    }
+
+    function renderMyFeedbacks() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const items = myFeedbacks.filter((item) => {
+        if (!keyword) return true;
+        return item.title.toLowerCase().includes(keyword) || item.id.toLowerCase().includes(keyword);
+      });
+
+      if (items.length === 0) {
+        feedbackList.innerHTML = '<div class="empty">没有匹配的反馈记录。</div>';
+        return;
+      }
+
+      feedbackList.innerHTML = '';
+      items.forEach((item) => {
+        const div = document.createElement('div');
+        div.className = 'feedback-item' + (item.id === currentFeedbackId ? ' active' : '');
+        div.innerHTML = `
+          <div class="feedback-title-line">
+            <strong>${item.title}</strong>
+            <span class="tag ${item.status === 'open' ? 'status-open' : 'status-closed'}">${item.status === 'open' ? '未处理' : '已处理'}</span>
+          </div>
+          <div class="feedback-meta">反馈编号：${item.id}<br>更新时间：${new Date(item.updatedAt).toLocaleString()}</div>
+        `;
+        div.addEventListener('click', async () => {
+          currentFeedbackId = item.id;
+          currentPage = 1;
+          renderMyFeedbacks();
+          await loadMessages(item.id);
+        });
+        feedbackList.appendChild(div);
+      });
     }
 
     async function loadMessages(id) {
       if (!id) return;
       const data = await api(`/api/feedbacks/${id}?page=${currentPage}&pageSize=6`);
       messageList.innerHTML = '';
-      data.messages.forEach(msg => {
-        const div = document.createElement('div');
-        div.className = 'message';
-        div.innerHTML = `<strong>${msg.author}</strong><div>${msg.content}</div><div class="muted">${new Date(msg.createdAt).toLocaleString()}</div>`;
-        messageList.appendChild(div);
-      });
+
+      if (!data.messages || data.messages.length === 0) {
+        messageList.innerHTML = '<div class="empty">当前反馈暂无对话记录。</div>';
+      } else {
+        data.messages.forEach((msg) => {
+          const div = document.createElement('div');
+          div.className = 'message';
+          div.innerHTML = `
+            <div class="message-header">
+              <strong>${msg.author}</strong>
+              <span class="muted">${new Date(msg.createdAt).toLocaleString()}</span>
+            </div>
+            <div class="message-body">${msg.content}</div>
+          `;
+          messageList.appendChild(div);
+        });
+      }
+
       currentPage = data.page;
       totalPages = data.totalPages;
       pageInfo.textContent = `第 ${currentPage} / ${totalPages} 页`;
@@ -454,59 +698,34 @@
 
     async function loadPublicFeedbacks() {
       const data = await api('/api/feedbacks/public');
+      const items = data.items || [];
+      if (items.length === 0) {
+        publicList.innerHTML = '<div class="empty">当前还没有公开反馈。</div>';
+        return;
+      }
+
       publicList.innerHTML = '';
-      data.items.forEach(item => {
+      items.forEach((item) => {
         const div = document.createElement('div');
         div.className = 'feedback-item';
-        div.innerHTML = `<strong>${item.title}</strong><div class="muted">${item.preview}</div>`;
+        div.innerHTML = `
+          <div class="feedback-title-line">
+            <strong>${item.title}</strong>
+            <span class="tag ${item.status === 'open' ? 'status-open' : 'status-closed'}">${item.status === 'open' ? '未处理' : '已处理'}</span>
+          </div>
+          <div class="feedback-meta">${item.preview || '暂无摘要内容'}</div>
+        `;
         publicList.appendChild(div);
       });
     }
 
-    async function loadAdminConfig() {
-      const data = await api('/api/admin/config');
-      guildConfig.value = JSON.stringify(data.config || [], null, 2);
+    async function init() {
+      const ok = await ensureLogin();
+      if (!ok) return;
+      await Promise.all([loadFeedbacks(), loadPublicFeedbacks()]);
     }
 
-    async function loadAdminFeedbacks() {
-      const search = encodeURIComponent(adminSearch.value.trim());
-      const status = encodeURIComponent(adminStatusFilter.value);
-      const data = await api(`/api/admin/feedbacks?search=${search}&status=${status}`);
-      adminFeedbackList.innerHTML = '';
-      data.items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'feedback-item' + (item.id === adminCurrentId ? ' active' : '');
-        div.innerHTML = `<strong>${item.title}</strong><div class="muted">${item.username}</div><span class="tag ${item.status === 'open' ? 'status-open' : 'status-closed'}">${item.status === 'open' ? '未处理' : '已处理'}</span>`;
-        div.addEventListener('click', () => {
-          adminCurrentId = item.id;
-          adminPage = 1;
-          loadAdminMessages(item.id);
-          loadAdminFeedbacks();
-        });
-        adminFeedbackList.appendChild(div);
-      });
-    }
-
-    async function loadAdminMessages(id) {
-      if (!id) return;
-      const data = await api(`/api/admin/feedbacks/${id}?page=${adminPage}&pageSize=6`);
-      adminMessageList.innerHTML = '';
-      statusSelect.value = data.status;
-      data.messages.forEach(msg => {
-        const div = document.createElement('div');
-        div.className = 'message';
-        div.innerHTML = `<strong>${msg.author}</strong><div>${msg.content}</div><div class="muted">${new Date(msg.createdAt).toLocaleString()}</div>`;
-        adminMessageList.appendChild(div);
-      });
-      adminPage = data.page;
-      adminTotalPages = data.totalPages;
-      adminPageInfo.textContent = `第 ${adminPage} / ${adminTotalPages} 页`;
-      adminPrevPageBtn.disabled = adminPage <= 1;
-      adminNextPageBtn.disabled = adminPage >= adminTotalPages;
-    }
-
-    loadFeedbacks();
-    loadPublicFeedbacks();
+    init();
   </script>
 </body>
 </html>

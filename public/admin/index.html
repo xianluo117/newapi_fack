@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NewAPI 管理员后台</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --panel: rgba(15, 23, 42, 0.9);
+      --panel-strong: rgba(17, 24, 39, 0.96);
+      --border: rgba(148, 163, 184, 0.16);
+      --text: #e5eefb;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --success: #4ade80;
+      --danger: #fb7185;
+      --shadow: 0 20px 60px rgba(2, 8, 23, 0.45);
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 28%),
+        linear-gradient(180deg, #07111f 0%, #0a1220 100%);
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1320px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+
+    .topbar,
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      padding: 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .topbar h1 { margin: 0; font-size: 24px; }
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 22px;
+    }
+
+    .panel { padding: 22px; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input,
+    textarea,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(2, 8, 23, 0.72);
+      color: var(--text);
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent) 0%, #0ea5e9 100%);
+      color: #03111d;
+    }
+
+    button.secondary {
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .feedback-list,
+    .messages {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 520px;
+      overflow: auto;
+    }
+
+    .feedback-item,
+    .message,
+    .empty {
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(2, 8, 23, 0.58);
+    }
+
+    .feedback-item {
+      padding: 14px;
+      cursor: pointer;
+    }
+
+    .feedback-item.active {
+      border-color: rgba(56, 189, 248, 0.75);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.18);
+    }
+
+    .message,
+    .empty { padding: 14px; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .status-open { color: var(--danger); }
+    .status-closed { color: var(--success); }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .row > * {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .panel-section + .panel-section {
+      margin-top: 22px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+    }
+
+    .message-header,
+    .feedback-title-line,
+    .section-header,
+    .pager {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .message-body {
+      margin-top: 8px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .feedback-meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div>
+        <h1>管理员后台</h1>
+        <div class="muted">从 /admin 进入后台。仅管理员账号密码可登录。</div>
+      </div>
+      <a href="/"><button type="button" class="secondary">返回用户页</button></a>
+    </header>
+
+    <section class="layout">
+      <div class="panel">
+        <div class="panel-section">
+          <div class="section-header">
+            <h2 style="margin:0;">管理员登录</h2>
+          </div>
+          <div class="field">
+            <label for="admin-user">用户名</label>
+            <input id="admin-user" type="text" />
+          </div>
+          <div class="field">
+            <label for="admin-pass">密码</label>
+            <input id="admin-pass" type="password" />
+          </div>
+          <button id="admin-login" type="button">进入后台</button>
+          <div id="admin-login-status" class="muted" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="panel-section" id="admin-config" style="display:none;">
+          <div class="section-header">
+            <h2 style="margin:0;">Discord 服务器 / 身份组配置</h2>
+          </div>
+          <div class="field">
+            <label for="guild-config">JSON 列表</label>
+            <textarea id="guild-config" placeholder='[{"guildId":"123","roleId":"456","label":"核心用户"}]'></textarea>
+          </div>
+          <button id="save-config" type="button">保存配置</button>
+          <div id="config-status" class="muted" style="margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-header">
+          <h2 style="margin:0;">反馈管理</h2>
+          <span id="admin-page-info" class="muted">第 1 / 1 页</span>
+        </div>
+
+        <div class="row" style="margin-bottom: 14px;">
+          <input id="admin-search" type="text" placeholder="搜索标题 / 用户 / 编号" />
+          <select id="admin-status-filter">
+            <option value="all">全部</option>
+            <option value="open">未处理</option>
+            <option value="closed">已处理</option>
+          </select>
+        </div>
+
+        <div class="feedback-list" id="admin-feedback-list"></div>
+
+        <div class="panel-section">
+          <div class="section-header">
+            <h2 style="margin:0;">管理员对话</h2>
+            <span class="muted">可回复并更新状态</span>
+          </div>
+          <div class="messages" id="admin-message-list"></div>
+          <div class="pager" style="margin:14px 0 4px;">
+            <button id="admin-prev-page" class="secondary" type="button">上一页</button>
+            <button id="admin-next-page" class="secondary" type="button">下一页</button>
+          </div>
+          <div class="field" style="margin-top: 14px;">
+            <label for="admin-message">回复内容</label>
+            <textarea id="admin-message" placeholder="管理员回复"></textarea>
+          </div>
+          <div class="row">
+            <select id="status-select">
+              <option value="open">未处理</option>
+              <option value="closed">已处理</option>
+            </select>
+            <button id="admin-send" type="button">发送并更新状态</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const api = (path, options = {}) => fetch(path, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      ...options,
+    }).then(async (res) => {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw data;
+      return data;
+    });
+
+    const adminLoginBtn = document.getElementById('admin-login');
+    const adminStatus = document.getElementById('admin-login-status');
+    const adminConfig = document.getElementById('admin-config');
+    const guildConfig = document.getElementById('guild-config');
+    const configStatus = document.getElementById('config-status');
+    const adminFeedbackList = document.getElementById('admin-feedback-list');
+    const adminMessageList = document.getElementById('admin-message-list');
+    const adminSendBtn = document.getElementById('admin-send');
+    const statusSelect = document.getElementById('status-select');
+    const adminSearch = document.getElementById('admin-search');
+    const adminStatusFilter = document.getElementById('admin-status-filter');
+    const adminPrevPageBtn = document.getElementById('admin-prev-page');
+    const adminNextPageBtn = document.getElementById('admin-next-page');
+    const adminPageInfo = document.getElementById('admin-page-info');
+
+    let adminCurrentId = null;
+    let adminPage = 1;
+    let adminTotalPages = 1;
+
+    adminLoginBtn.addEventListener('click', async () => {
+      const user = document.getElementById('admin-user').value.trim();
+      const password = document.getElementById('admin-pass').value.trim();
+      adminStatus.textContent = '登录中...';
+      try {
+        await api('/api/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ user, password }),
+        });
+        adminStatus.textContent = '登录成功';
+        adminConfig.style.display = 'block';
+        await loadAdminConfig();
+        await loadAdminFeedbacks();
+      } catch (err) {
+        adminStatus.textContent = err.message || '登录失败';
+      }
+    });
+
+    adminSearch.addEventListener('input', () => {
+      loadAdminFeedbacks();
+    });
+
+    adminStatusFilter.addEventListener('change', () => {
+      loadAdminFeedbacks();
+    });
+
+    document.getElementById('save-config').addEventListener('click', async () => {
+      try {
+        const config = JSON.parse(guildConfig.value || '[]');
+        await api('/api/admin/config', {
+          method: 'PUT',
+          body: JSON.stringify({ config }),
+        });
+        configStatus.textContent = '保存成功';
+      } catch (err) {
+        configStatus.textContent = err.message || '保存失败';
+      }
+    });
+
+    adminSendBtn.addEventListener('click', async () => {
+      if (!adminCurrentId) return alert('请选择反馈');
+      const content = document.getElementById('admin-message').value.trim();
+      const status = statusSelect.value;
+      if (!content) return alert('请输入回复内容');
+      try {
+        await api(`/api/admin/feedbacks/${adminCurrentId}/messages`, {
+          method: 'POST',
+          body: JSON.stringify({ content, status }),
+        });
+        document.getElementById('admin-message').value = '';
+        adminPage = adminTotalPages;
+        await loadAdminMessages(adminCurrentId);
+        await loadAdminFeedbacks();
+      } catch (err) {
+        alert(err.message || '发送失败');
+      }
+    });
+
+    adminPrevPageBtn.addEventListener('click', () => {
+      if (adminPage > 1) {
+        adminPage -= 1;
+        loadAdminMessages(adminCurrentId);
+      }
+    });
+
+    adminNextPageBtn.addEventListener('click', () => {
+      if (adminPage < adminTotalPages) {
+        adminPage += 1;
+        loadAdminMessages(adminCurrentId);
+      }
+    });
+
+    async function loadAdminConfig() {
+      const data = await api('/api/admin/config');
+      guildConfig.value = JSON.stringify(data.config || [], null, 2);
+    }
+
+    async function loadAdminFeedbacks() {
+      const search = encodeURIComponent(adminSearch.value.trim());
+      const status = encodeURIComponent(adminStatusFilter.value);
+      const data = await api(`/api/admin/feedbacks?search=${search}&status=${status}`);
+      const items = data.items || [];
+
+      if (!adminCurrentId && items.length > 0) {
+        adminCurrentId = items[0].id;
+      }
+
+      if (items.length === 0) {
+        adminFeedbackList.innerHTML = '<div class="empty">当前没有匹配的反馈。</div>';
+      } else {
+        adminFeedbackList.innerHTML = '';
+        items.forEach((item) => {
+          const div = document.createElement('div');
+          div.className = 'feedback-item' + (item.id === adminCurrentId ? ' active' : '');
+          div.innerHTML = `
+            <div class="feedback-title-line">
+              <strong>${item.title}</strong>
+              <span class="tag ${item.status === 'open' ? 'status-open' : 'status-closed'}">${item.status === 'open' ? '未处理' : '已处理'}</span>
+            </div>
+            <div class="feedback-meta">Discord 用户：${item.username}<br>反馈编号：${item.id}</div>
+          `;
+          div.addEventListener('click', async () => {
+            adminCurrentId = item.id;
+            adminPage = 1;
+            await loadAdminMessages(item.id);
+            await loadAdminFeedbacks();
+          });
+          adminFeedbackList.appendChild(div);
+        });
+      }
+
+      const exists = items.some((item) => item.id === adminCurrentId);
+      if (!exists && items.length > 0) {
+        adminCurrentId = items[0].id;
+      }
+      if (adminCurrentId) {
+        await loadAdminMessages(adminCurrentId);
+      } else {
+        adminMessageList.innerHTML = '<div class="empty">请选择一条反馈查看对话。</div>';
+      }
+    }
+
+    async function loadAdminMessages(id) {
+      if (!id) return;
+      const data = await api(`/api/admin/feedbacks/${id}?page=${adminPage}&pageSize=6`);
+      adminMessageList.innerHTML = '';
+      statusSelect.value = data.status;
+
+      if (!data.messages || data.messages.length === 0) {
+        adminMessageList.innerHTML = '<div class="empty">当前反馈暂无对话。</div>';
+      } else {
+        data.messages.forEach((msg) => {
+          const div = document.createElement('div');
+          div.className = 'message';
+          div.innerHTML = `
+            <div class="message-header">
+              <strong>${msg.author}</strong>
+              <span class="muted">${new Date(msg.createdAt).toLocaleString()}</span>
+            </div>
+            <div class="message-body">${msg.content}</div>
+          `;
+          adminMessageList.appendChild(div);
+        });
+      }
+
+      adminPage = data.page;
+      adminTotalPages = data.totalPages;
+      adminPageInfo.textContent = `第 ${adminPage} / ${adminTotalPages} 页`;
+      adminPrevPageBtn.disabled = adminPage <= 1;
+      adminNextPageBtn.disabled = adminPage >= adminTotalPages;
+    }
+  </script>
+</body>
+</html>

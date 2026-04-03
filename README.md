@@ -3,35 +3,50 @@
 ## 功能
 
 - Discord OAuth2 登录（identify / guilds.channels.read）并校验指定服务器/身份组
+- 用户页强制 Discord 登录，未登录会自动跳转授权
 - 用户反馈提交、历史对话、只读公共反馈列表
-- 管理员后台：账号密码登录、配置服务器/身份组、查看反馈与 Discord 用户名、标签状态、对话回复
+- 管理员后台从 `/admin` 进入：账号密码登录、配置服务器/身份组、查看反馈与 Discord 用户名、标签状态、对话回复
+- 管理员搜索/筛选、用户/管理员对话分页
+
+## 页面说明
+
+- `/`：用户前台页面，强制 Discord 登录
+- `/admin`：管理员后台入口，使用环境变量中的管理员账号密码登录
 
 ## Cloudflare Pages 部署设置
 
 1. 在 Cloudflare Pages 创建新项目并连接 Git 仓库。
 2. Framework preset 选择 **None**。
-3. Build command 留空（或填写 `npm run build`，但本项目无需构建）。
+3. Build command 留空。
 4. Build output directory 填写 `public`。
-5. Functions 目录默认使用 `functions/`（无需额外配置）。
-6. 在项目设置中配置以下环境变量（Production/Preview 均需设置）。
-
-> 回调地址示例：`https://your-domain.com/api/auth/callback`
+5. Functions 目录使用项目根目录下的 `functions/`。
+6. 在项目设置中配置环境变量与 KV 绑定。
+7. Discord OAuth 回调地址填写：`https://你的域名/api/auth/callback`
 
 ## Cloudflare 环境变量
 
 - `DISCORD_CLIENT_ID`
 - `DISCORD_CLIENT_SECRET`
-- `DISCORD_REDIRECT_URI`（必须与 Discord 应用回调一致）
-- `DISCORD_BOT_TOKEN`（用于查询 guild 成员身份组）
+- `DISCORD_REDIRECT_URI`
+- `DISCORD_BOT_TOKEN`
 - `ADMIN_USER`
 - `ADMIN_PASS_HASH`（SHA256 后的密码）
-- `ADMIN_SESSION_TOKEN`（任意字符串，用于后台 session）
+- `ADMIN_SESSION_TOKEN`（管理员后台 cookie token）
 
 ## KV 绑定
 
-在 `wrangler.toml` 中配置（需要手动补充）：
+在 Cloudflare Pages 项目的 **Settings -> Functions -> KV namespace bindings** 中添加：
+
+- `SESSIONS`
+- `FEEDBACKS`
+- `CONFIG`
+
+如果使用 `wrangler.toml`，可参考：
 
 ```toml
+name = "newapi-feedback"
+compatibility_date = "2024-10-01"
+
 [[kv_namespaces]]
 binding = "SESSIONS"
 id = "xxxx"
@@ -45,10 +60,22 @@ binding = "CONFIG"
 id = "xxxx"
 ```
 
+## 安装依赖
+
+```bash
+npm install
+```
+
 ## 本地运行
 
 ```bash
-wrangler dev
+npm run dev
+```
+
+## TypeScript 检查
+
+```bash
+npm run type-check
 ```
 
 ## 管理员密码哈希生成

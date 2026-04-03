@@ -1,0 +1,14 @@
+{
+  "name": "newapi-feedback",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "type-check": "tsc -p tsconfig.json",
+    "dev": "wrangler pages dev public --compatibility-date=2024-10-01",
+    "deploy": "wrangler pages deploy public"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.12",
+    "typescript": "^5.6.3"
+  }
+}

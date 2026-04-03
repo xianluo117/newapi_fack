@@ -1,27 +1,36 @@
-import { json, requireUser, randomId, saveFeedback, listFeedbacks } from '../../utils';
+import {
+  getErrorMessage,
+  json,
+  listFeedbacks,
+  randomId,
+  requireUser,
+  saveFeedback,
+  type FeedbackItem,
+  type PagesFunctionContext,
+} from '../../utils';
 
-export async function onRequestGet(context) {
+export async function onRequestGet(context: PagesFunctionContext): Promise<Response> {
   const { env, request } = context;
   try {
     const user = await requireUser(request, env);
     const all = await listFeedbacks(env);
-    const items = all.filter(item => item.ownerId === user.id);
+    const items = all.filter((item) => item.ownerId === user.id);
     return json({ items });
-  } catch (err) {
-    return json({ message: err.message || '未登录' }, 401);
+  } catch (err: unknown) {
+    return json({ message: getErrorMessage(err, '未登录') }, 401);
   }
 }
 
-export async function onRequestPost(context) {
+export async function onRequestPost(context: PagesFunctionContext): Promise<Response> {
   const { env, request } = context;
   try {
     const user = await requireUser(request, env);
-    const body = await request.json();
+    const body = (await request.json()) as { title?: string; content?: string };
     const id = randomId();
     const now = Date.now();
-    const feedback = {
+    const feedback: FeedbackItem = {
       id,
-      title: body.title,
+      title: body.title || '',
       status: 'open',
       ownerId: user.id,
       ownerUsername: user.username,
@@ -32,7 +41,7 @@ export async function onRequestPost(context) {
           id: randomId(),
           author: user.username,
           authorId: user.id,
-          content: body.content,
+          content: body.content || '',
           createdAt: now,
         },
       ],
@@ -40,7 +49,7 @@ export async function onRequestPost(context) {
     };
     await saveFeedback(env, feedback);
     return json({ id });
-  } catch (err) {
-    return json({ message: err.message || '提交失败' }, 400);
+  } catch (err: unknown) {
+    return json({ message: getErrorMessage(err, '提交失败') }, 400);
   }
 }

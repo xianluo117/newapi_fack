@@ -1,7 +1,7 @@
-import { json, requireEnv, setSession, randomId, setCookie } from '../../utils';
+import { randomId, requireEnv, type PagesFunctionContext } from '../../utils';
 
-export async function onRequest(context) {
-  const { env, request } = context;
+export async function onRequest(context: PagesFunctionContext): Promise<Response> {
+  const { env } = context;
   const clientId = requireEnv(env, 'DISCORD_CLIENT_ID');
   const redirectUri = requireEnv(env, 'DISCORD_REDIRECT_URI');
   const state = randomId();
